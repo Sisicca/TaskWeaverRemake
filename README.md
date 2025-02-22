@@ -28,4 +28,65 @@
 pip install uv
 ```
 
+拉取项目并配置环境
+
+```bash
+git clone https://Sisicca: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@github.com/Sisicca/TaskWeaverRemake.git
+```
+
+配置环境（运行hello.py会自动同步依赖）
+
+```bash
+cd TaskWeaverRemake
+uv run hello.py
+```
+
+激活环境
+
+```bash
+source .venv/bin/activate
+```
+
+## 配置config文件
+
+在config文件夹下创建config.yaml文件，并根据config_template.yaml文件配置。
+
+配置文件说明：
+
+- **planner配置**:
+  - alias: 智能体别名
+  - openai_api_key: OpenAI API密钥
+  - openai_base_url: OpenAI API基础URL
+  - model: 使用的语言模型(推荐gpt-4o)
+  - model_kwargs: 模型参数配置
+    - temperature: 采样温度
+  - embedding_model: 使用的嵌入模型
+  - cases_path: 任务规划案例路径
+  - max_workers: 调用嵌入模型最大工作线程数
+  - workspace_path: 任务规划工作空间(需与code_interpreter一致)。当前任务数据文件等需存储于此。
+
+- **code_interpreter配置**:
+  - alias: 智能体别名
+  - openai_api_key: OpenAI API密钥
+  - openai_base_url: OpenAI API基础URL
+  - model: 使用的语言模型(推荐gpt-4o)
+  - model_kwargs: 模型参数配置
+    - temperature: 采样温度
+  - embedding_model: 使用的嵌入模型
+  - cases_path: 代码执行案例路径
+  - max_workers: 调用嵌入模型最大工作线程数
+  - workspace_path: 代码执行工作空间(需与planner一致)。当前任务数据文件等需存储于此。
+  - notebook_name: 代码执行jupyter文件名
+
+## 运行项目
+
+```bash
+uv run -m src.main --config config/config.yaml
+```
+
+## 输出结果
+
+- **代码执行日志**: 在code_interpreter的workspace_path路径下生成notebook文件，记录代码执行日志。
+- **智能体交互日志**: src/logs下，记录智能体交互日志。
+
 

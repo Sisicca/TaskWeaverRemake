@@ -6,9 +6,9 @@ planner:
   model_kwargs:
     temperature: 0.8
   embedding_model: YourEmbeddingModel
-  cases_path: src/cases/plans
-  max_workers: 10
-  workspace_path: src/workspaces/test
+  cases_path: src/cases/plans # 任务规划案例路径
+  max_workers: 10 # 调用嵌入模型最大工作线程数
+  workspace_path: src/workspaces/test # 任务规划工作空间，需要与code_interpreter的workspace_path一致
 
 code_interpreter:
   alias: code_interpreter
@@ -19,6 +19,6 @@ code_interpreter:
     temperature: 0.8
   embedding_model: YourEmbeddingModel
   cases_path: src/cases/codes
-  max_workers: 10
-  workspace_path: src/workspaces/test
-  notebook_name: execution_log.ipynb
+  max_workers: 10 # 调用嵌入模型最大工作线程数
+  workspace_path: src/workspaces/test # 代码执行工作空间，需要与planner的workspace_path一致
+  notebook_name: execution_log.ipynb # 代码执行jupyter文件名
