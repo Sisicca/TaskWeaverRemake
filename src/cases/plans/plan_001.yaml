@@ -1,0 +1,24 @@
+metadata:
+  title: plan_001
+  description: "查看test.csv文件有多少条数据"
+  workspace_files:
+    - name: "test.txt"
+      description: "测试txt文件"
+
+    - name: "test.csv"
+      description: "测试csv文件"
+
+    - name: "test.json"
+      description: "测试json文件"
+
+plan:
+  - step: 1
+    task:
+      description: "从工作区中读取test.csv文件"
+  
+  - step: 2
+    task:
+      description: "打印test.csv文件的行数"
+
+      
+      

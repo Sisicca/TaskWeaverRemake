@@ -1,0 +1,11 @@
+metadata:
+  title: code_001
+  description: "关于如何查看csv文件样本数的代码"
+  workspace_files:
+    - name: "test.csv"
+      description: "这是一个测试csv文件"
+
+code: |
+  import pandas as pd
+  df = pd.read_csv("test.csv")
+  print("样本数为：", df.shape[0]) 

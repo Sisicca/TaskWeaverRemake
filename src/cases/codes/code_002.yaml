@@ -1,0 +1,104 @@
+metadata:
+  title: code_002
+  description: "如何调用大模型对病历文本进行标注。根据主诉、现病史、体格检查等字段中，是否有发热、咳嗽、咽痛的描述进行标注。"
+  workspace_files:
+    - name: "门诊病历.csv"
+      description: "包含病历序号、主诉、现病史、体格检查等字段"
+
+code: |
+  import pandas as pd
+  from openai import OpenAI
+  import os
+  import json
+  from tenacity import retry, stop_after_attempt, wait_exponential
+  from concurrent.futures import ThreadPoolExecutor, as_completed
+  from tqdm.notebook import tqdm
+
+  df = pd.read_excel('症状监测（吴淞医院）初筛版20250106.xlsx', sheet_name='ILI')
+  df = df[['SYXH', '主诉', '现病史', '查体']] # 只保留需要的字段
+
+  # 角色和任务
+  system_prompt = """
+  你是一个顶级的医学文本标注专家，你负责对病历文本进行标注。
+  病历文本包含以下字段：
+      1. 病人主诉：病人的主诉，通常是病人就诊时最主要的症状。
+      2. 病人现病史：病人的现病史，通常是病人就诊时症状的详细描述。
+      3. 病人体格检查结果：病人的体格检查结果，通常是病人就诊时进行的体格检查，包含体温、心率、血压、呼吸、血氧等测试结果。
+  在标注之前，你需要根据标注任务对病历文本进行详尽的分析，并说明你为什么做出这样的判断。
+  完成标注后，请把分析内容和标注结果以JSON格式返回。
+  """
+
+  # 用户输入和输出格式
+  user_prompt_template = """
+  请从病历文本中判断并抽取以下情况：
+      最高体温大于或等于38摄氏度
+      明确出现“咽痛”的症状
+      明确出现“咳嗽”的症状
+
+  输出格式：
+  ```json
+  {{
+      "分析内容": "你对该病历文本的详尽分析以及你的判断依据",
+      "最高体温大于或等于38摄氏度": "是/否",
+      "明确出现“咽痛”的症状": "是/否",
+      "明确出现“咳嗽”的症状": "是/否",
+  }}
+  ```
+
+  ### 病历文本
+  病人主诉：{main_symptom}
+
+  病人现病史：{present_history}
+
+  病人体格检查结果：{physical_examination}
+  ###
+  """
+
+  # 限制模型输出为json
+  assistant_prompt = """
+  ```json
+  """
+
+  client = OpenAI(api_key="sk-eapAMviFnIhsZ3PgDb58F107A8E94723850a6781362998C8", base_url="https://api.ai-gaochao.cn/v1")
+
+  @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=3))
+  def annotate_case(main_symptom, present_history, physical_examination):
+      response = client.chat.completions.create(
+          model="gpt-4o",
+          messages=[
+              {"role": "system", "content": system_prompt},
+              {"role": "user", "content": user_prompt_template.format(main_symptom=main_symptom, present_history=present_history, physical_examination=physical_examination)},
+              {"role": "assistant", "content": assistant_prompt}
+          ]
+      )
+      # print(response.choices[0].message.content)
+      return json.loads(response.choices[0].message.content.strip("```").strip("json"))
+
+  # 创建一个列表存储结果
+  results = [None] * len(df)
+  futures_dict = {}
+
+  # 并发数10，可以自行调整
+  with ThreadPoolExecutor(max_workers=10) as executor:
+      # 提交任务时保存索引
+      for index, row in df.iterrows():
+          future = executor.submit(annotate_case, row['主诉'], row['现病史'], row['查体'])
+          futures_dict[future] = index
+      
+      # 按完成顺序获取结果，但存储时保持原始顺序
+      with tqdm(total=len(df), desc="标注进度") as pbar:
+          for future in as_completed(futures_dict.keys()):
+              index = futures_dict[future]
+              result = future.result()
+              results[index] = result
+              pbar.update(1)
+
+  # 将结果添加到DataFrame
+  df['标注结果'] = results
+  result_df = pd.json_normalize(df['标注结果'])
+  df = pd.concat([df.drop('标注结果', axis=1), result_df], axis=1)
+
+  # 保存结果
+  df.to_excel('门诊病历_标注结果.xlsx', index=False)
+
+  

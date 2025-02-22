@@ -1,0 +1,16 @@
+metadata:
+  title: plan_000
+  description: "这是一个plan案例的模版介绍"
+  workspace_files:
+    - name: "test.txt"
+      description: "这是一个测试文件"
+
+plan:
+  - step: 1
+    task:
+      description: "打印一些什么"
+  
+  - step: 2
+    task:
+      description: "再打印一些什么"
+        

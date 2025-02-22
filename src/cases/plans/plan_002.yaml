@@ -1,0 +1,20 @@
+metadata:
+  title: plan_002
+  description: "病历文本数据标注：判断主诉、现病史、体格检查等字段中，是否有发热（38度以上）、是否有咳嗽、是否有咽痛"
+  workspace_files:
+    - name: "门诊病历.csv"
+      description: "门诊病历数据，包含病历序号、年龄、姓名、主诉、现病史、体格检查等字段"
+
+plan:
+  - step: 1
+    description: "从工作区中读取门诊病历.csv文件并查看文件大致内容"
+
+  - step: 2
+    description: "构建一个函数，用于判断主诉、现病史、体格检查等字段中，是否有发热（38度以上）、是否有咳嗽、是否有咽痛"
+  
+  - step: 3
+    description: "使用构建的函数，对门诊病历.csv文件中的数据进行标注，利用多线程并发推理，提高效率"
+
+  - step: 4
+    description: "处理标注结果，将标注结果保存到工作区中"
+

@@ -1,0 +1,24 @@
+planner:
+  alias: planner
+  openai_api_key: sk-eapAMviFnIhsZ3PgDb58F107A8E94723850a6781362998C8
+  openai_base_url: https://api.ai-gaochao.cn/v1
+  model: gpt-4o # 貌似gpt-4o-mini无法有效遵循json schema prompt进行输出
+  model_kwargs:
+    temperature: 0.8
+  embedding_model: text-embedding-3-small
+  cases_path: src/cases/plans
+  max_workers: 10
+  workspace_path: src/workspaces/annotation_ili
+
+code_interpreter:
+  alias: code_interpreter
+  openai_api_key: sk-eapAMviFnIhsZ3PgDb58F107A8E94723850a6781362998C8
+  openai_base_url: https://api.ai-gaochao.cn/v1
+  model: gpt-4o # 貌似gpt-4o-mini无法有效遵循json schema prompt进行输出
+  model_kwargs:
+    temperature: 0.8
+  embedding_model: text-embedding-3-small
+  cases_path: src/cases/codes
+  max_workers: 10
+  workspace_path: src/workspaces/annotation_ili
+  notebook_name: execution_log.ipynb
