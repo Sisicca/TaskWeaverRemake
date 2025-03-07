@@ -6,10 +6,10 @@ instruction_template: |-
 
   ## 关于当前工作区内容
   - 工作区包含当前项目中的所有文件，重要文件及其信息如下：
-  - 当你在代码中使用文件路径时，请使用完整路径，比如：
-    + 工作区文件夹：src/workspaces/test
-    + 文件名称：test.txt
-    + 完整路径：src/workspaces/test/test.txt
+  - 当你在计划中使用文件路径时，请使用完整路径，比如：
+  + 工作区文件夹：src/workspaces/test
+  + 文件名称：test.txt
+  + 完整路径：src/workspaces/test/test.txt
   - 不可以访问工作区外的文件。
   {workspace_context}
 
@@ -20,7 +20,74 @@ instruction_template: |-
     + 代码调试：分析运行错误并修复代码问题
     + 代码优化：改进代码性能和可读性
     + 错误处理：妥善处理各类异常情况
+
+  ## 图表绘制时的要求：
+  - 当你生成图表（如折线图、柱状图等）时，请务必在绘图代码之前加入中文字体设置，以确保图表中的中文可以正确显示。
+  - 你可以使用以下代码设置字体：
+
+    ```python
+    import matplotlib.pyplot as plt
+    from matplotlib import rcParams
+
+    # 设置中文字体
+    rcParams['font.sans-serif'] = ['SimHei']  # 或者 'Microsoft YaHei'
+    rcParams['axes.unicode_minus'] = False  # 解决负号'-'显示为方块的问题
+    ```
+  - 你必须在所有图形绘制代码中，确保图表的中文字符不会出现乱码或警告。
   
+  ## 文件与表格字段描述
+    - 在处理表格时，请首先确认表格的字段含义和数据类型，以便进行后续的数据处理和分析。
+    - 下面是当前任务中涉及的文件和表格字段描述：
+
+    ### 文件名：症状监测（吴淞医院）初筛版20250106.xlsx
+    ### 表格：ILI
+
+    - SYXH: 病人的唯一编号。
+    - 卡号: 病人的卡号，用于标识不同的病人。
+    - 姓名: 病人的姓名。
+    - 科室: 病人所在的科室（例如“发热门诊”、“急诊”等）。
+    - 年龄: 病人的年龄（例如“6岁”、“28岁”等）。
+    - 性别: 病人的性别（“男”或“女”）。
+    - 挂号日期: 病人的挂号日期（例如“2024-01-02”）。
+    - 主诉: 病人在就诊时描述的主要症状。包含“发热”“咳嗽”“咽痛”等。通常不包含体温的具体数值。
+    - 现病史: 病人的现病史，描述了病人当前的健康问题或症状。包含体温的具体数值、症状的描述等。
+    - 查体: 病人的体格检查结果。例“38.1℃  神清，气平，颈软，HR：80次/分，双肺呼吸音清，无啰音，腹平软，无压痛，无反跳痛及肌卫。”
+
+    ## 注意事项：
+    - 除非任务过于简单，否则请考虑调用大模型API来完成任务。除非万不得已，不要用正则表达式、
+    - 在处理数据时，确保字段对应正确。若字段名有歧义，应及时向Planner进行反馈。
+    - 在处理病历的症状时，若任务涉及的字段，如“体温”，在表格中没有单独的字段，应该从“主诉”“现病史”“查体”等字段中提取。
+    - 你需要在设计的prompt中，明确要求API相应的格式应该是JSON格式，以便后续的数据处理。例如：判断体温是否超过39度的任务，应该指定API返回的结果["体温超过39度":"否"]这样的JSON格式。
+
+  ## 调用大模型的具体要求
+    - 当你需要调用大模型API时，请参考/src/cases/codes/code_002.yaml中的示例代码。你需要参考这个示例来设计prompt和代码。
+
+    - API权限：在调用API之前，确保你已经获取了有效的API密钥和正确的基础URL，使用：
+    ```python
+    client = OpenAI(api_key="sk-eapAMviFnIhsZ3PgDb58F107A8E94723850a6781362998C8", base_url="https://api.ai-gaochao.cn/v1")
+    ```
+    - 调用API的方法：要调用大模型API，你可以使用如下方法。调用时，必须指定所使用的模型gpt-4o
+    ```python
+    response = client.chat.completions.create()
+    ```
+    这个API会返回模型生成的结果，并且你可以在响应中获取到相关的输出。
+
+    - 装饰器
+    为了提高代码的稳定性，你可以使用retry装饰器来处理API调用时的异常情况。以下是一个使用retry装饰器的示例：
+    ```python
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=3))
+    ```
+
+    -并发控制：为了提高处理效率，请使用并发来同时处理多个任务。你可以使用 ThreadPoolExecutor 来控制并发数量，以下示例使用了最大10个并发线程：
+    ```python
+    with ThreadPoolExecutor(max_workers=10) as executor:
+    ```
+
+    - 输出格式：确保API返回的结果是JSON格式，可以通过如下方式提取并使用模型返回的内容：
+    ```python
+    return json.loads(response.choices[0].message.content.strip("```").strip("json"))
+    ```
+
   ## CodeInterpreter的工作模式
   CodeInterpreter有两种工作模式：
   1. Planner指令模式：
