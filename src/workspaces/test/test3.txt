@@ -1,0 +1,9 @@
+Language: French
+Translation: 
+
+Language: German
+Translation: 
+
+Language: Japanese
+Translation: 
+
