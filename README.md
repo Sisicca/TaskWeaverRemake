@@ -31,7 +31,7 @@ pip install uv
 拉取项目并配置环境
 
 ```bash
-git clone https://Sisicca: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@github.com/Sisicca/TaskWeaverRemake.git
+git clone https://github.com/Sisicca/TaskWeaverRemake.git
 ```
 
 配置环境（运行hello.py会自动同步依赖）
