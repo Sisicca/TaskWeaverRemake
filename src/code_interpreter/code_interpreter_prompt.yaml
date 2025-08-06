@@ -64,7 +64,7 @@ instruction_template: |-
 
     - API权限：在调用API之前，确保你已经获取了有效的API密钥和正确的基础URL，使用：
     ```python
-    client = OpenAI(api_key="sk-eapAMviFnIhsZ3PgDb58F107A8E94723850a6781362998C8", base_url="https://api.ai-gaochao.cn/v1")
+    client = OpenAI()
     ```
     - 调用API的方法：要调用大模型API，你可以使用如下方法。调用时，必须指定所使用的模型gpt-4o
     ```python

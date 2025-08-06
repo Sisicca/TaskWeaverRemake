@@ -59,7 +59,7 @@ code: |
   ```json
   """
 
-  client = OpenAI(api_key="sk-eapAMviFnIhsZ3PgDb58F107A8E94723850a6781362998C8", base_url="https://api.ai-gaochao.cn/v1")
+  client = OpenAI()
 
   @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=3))
   def annotate_case(main_symptom, present_history, physical_examination):
